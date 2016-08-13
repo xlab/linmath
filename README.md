@@ -1,4 +1,4 @@
-linmath
+linmath [![GoDoc](https://godoc.org/github.com/xlab/linmath?status.svg)](https://godoc.org/github.com/xlab/linmath)
 -------
 
 A small library for linear math as required for computer graphics.
