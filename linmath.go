@@ -14,7 +14,7 @@ func (m *Mat4x4) Identity() {
 	}
 }
 
-func (m *Mat4x4) Dup(n Mat4x4) {
+func (m *Mat4x4) Dup(n *Mat4x4) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			m[i][j] = n[i][j]
@@ -22,19 +22,19 @@ func (m *Mat4x4) Dup(n Mat4x4) {
 	}
 }
 
-func (r *Vec4) Mat4x4Row(m Mat4x4, i int) {
+func (r *Vec4) Mat4x4Row(m *Mat4x4, i int) {
 	for k := 0; k < 4; k++ {
 		r[k] = m[k][i]
 	}
 }
 
-func (r *Vec4) Mat4x4Col(m Mat4x4, i int) {
+func (r *Vec4) Mat4x4Col(m *Mat4x4, i int) {
 	for k := 0; k < 4; k++ {
 		r[k] = m[i][k]
 	}
 }
 
-func (m *Mat4x4) Transpose(n Mat4x4) {
+func (m *Mat4x4) Transpose(n *Mat4x4) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			m[i][j] = n[j][i]
@@ -42,35 +42,35 @@ func (m *Mat4x4) Transpose(n Mat4x4) {
 	}
 }
 
-func (m *Mat4x4) Add(a, b Mat4x4) {
+func (m *Mat4x4) Add(a, b *Mat4x4) {
 	for i := 0; i < 4; i++ {
-		m[i].Add(a[i], b[i])
+		m[i].Add(&a[i], &b[i])
 	}
 }
 
-func (m *Mat4x4) Sub(a, b Mat4x4) {
+func (m *Mat4x4) Sub(a, b *Mat4x4) {
 	for i := 0; i < 4; i++ {
-		m[i].Sub(a[i], b[i])
+		m[i].Sub(&a[i], &b[i])
 	}
 }
 
-func (m *Mat4x4) Scale(a Mat4x4, k float32) {
+func (m *Mat4x4) Scale(a *Mat4x4, k float32) {
 	for i := 0; i < 4; i++ {
-		m[i].Scale(a[i], k)
+		m[i].Scale(&a[i], k)
 	}
 }
 
-func (m *Mat4x4) ScaleAniso(a Mat4x4, x, y, z float32) {
-	m[0].Scale(a[0], x)
-	m[1].Scale(a[1], y)
-	m[2].Scale(a[2], z)
+func (m *Mat4x4) ScaleAniso(a *Mat4x4, x, y, z float32) {
+	m[0].Scale(&a[0], x)
+	m[1].Scale(&a[1], y)
+	m[2].Scale(&a[2], z)
 	for i := 0; i < 4; i++ {
 		m[3][i] = a[3][i]
 	}
 }
 
-func (m *Mat4x4) Mult(a, b Mat4x4) {
-	var temp Mat4x4
+func (m *Mat4x4) Mult(a, b *Mat4x4) {
+	var temp = new(Mat4x4)
 
 	for c := 0; c < 4; c++ {
 		for r := 0; r < 4; r++ {
@@ -84,7 +84,7 @@ func (m *Mat4x4) Mult(a, b Mat4x4) {
 	m.Dup(temp)
 }
 
-func (r *Vec4) Mat4x4MultVec4(m Mat4x4, v Vec4) {
+func (r *Vec4) Mat4x4MultVec4(m *Mat4x4, v Vec4) {
 	for j := 0; j < 4; j++ {
 		r[j] = 0
 		for i := 0; i < 4; i++ {
@@ -101,15 +101,15 @@ func (m *Mat4x4) Translate(x, y, z float32) {
 }
 
 func (m *Mat4x4) TranslateInPlace(x, y, z float32) {
-	var t Vec4 = Vec4{x, y, z, 0}
-	var r Vec4
+	var t = &Vec4{x, y, z, 0}
+	var r = new(Vec4)
 	for i := 0; i < 4; i++ {
-		r.Mat4x4Row(*m, i)
+		r.Mat4x4Row(m, i)
 		m[3][i] += Vec4MultInner(r, t)
 	}
 }
 
-func (m *Mat4x4) FromVec3MultOuter(a, b Vec3) {
+func (m *Mat4x4) FromVec3MultOuter(a, b *Vec3) {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {
 			if i < 3 && j < 3 {
@@ -121,17 +121,17 @@ func (m *Mat4x4) FromVec3MultOuter(a, b Vec3) {
 	}
 }
 
-func (r *Mat4x4) Rotate(m Mat4x4, x, y, z, angle float32) {
+func (r *Mat4x4) Rotate(m *Mat4x4, x, y, z, angle float32) {
 	var s = sinf(angle)
 	var c = cosf(angle)
-	var u Vec3 = Vec3{x, y, z}
+	var u = &Vec3{x, y, z}
 
 	if u.Len() > 1e-4 {
 		u.Norm(u)
-		var T Mat4x4
+		var T = new(Mat4x4)
 		T.FromVec3MultOuter(u, u)
 
-		var S Mat4x4 = Mat4x4{
+		var S = &Mat4x4{
 			{0, u[2], -u[1], 0},
 			{-u[2], 0, u[0], 0},
 			{u[1], -u[0], 0, 0},
@@ -139,7 +139,7 @@ func (r *Mat4x4) Rotate(m Mat4x4, x, y, z, angle float32) {
 		}
 		S.Scale(S, s)
 
-		var C Mat4x4
+		var C = new(Mat4x4)
 		C.Identity()
 		C.Sub(C, T)
 
@@ -155,10 +155,10 @@ func (r *Mat4x4) Rotate(m Mat4x4, x, y, z, angle float32) {
 	}
 }
 
-func (q *Mat4x4) RotateX(m Mat4x4, angle float32) {
+func (q *Mat4x4) RotateX(m *Mat4x4, angle float32) {
 	var s = sinf(angle)
 	var c = cosf(angle)
-	var R Mat4x4 = Mat4x4{
+	var R = &Mat4x4{
 		{1, 0, 0, 0},
 		{0, c, s, 0},
 		{0, -s, c, 0},
@@ -167,10 +167,10 @@ func (q *Mat4x4) RotateX(m Mat4x4, angle float32) {
 	q.Mult(m, R)
 }
 
-func (q *Mat4x4) RotateY(m Mat4x4, angle float32) {
+func (q *Mat4x4) RotateY(m *Mat4x4, angle float32) {
 	var s = sinf(angle)
 	var c = cosf(angle)
-	var R Mat4x4 = Mat4x4{
+	var R = &Mat4x4{
 		{c, 0, s, 0},
 		{0, 1, 0, 0},
 		{-s, 0, c, 0},
@@ -179,10 +179,10 @@ func (q *Mat4x4) RotateY(m Mat4x4, angle float32) {
 	q.Mult(m, R)
 }
 
-func (q *Mat4x4) RotateZ(m Mat4x4, angle float32) {
+func (q *Mat4x4) RotateZ(m *Mat4x4, angle float32) {
 	var s = sinf(angle)
 	var c = cosf(angle)
-	var R Mat4x4 = Mat4x4{
+	var R = &Mat4x4{
 		{c, s, 0, 0},
 		{-s, c, 0, 0},
 		{0, 0, 1, 0},
@@ -191,8 +191,8 @@ func (q *Mat4x4) RotateZ(m Mat4x4, angle float32) {
 	q.Mult(m, R)
 }
 
-func (t *Mat4x4) Invert(m Mat4x4) {
-	var s [6]float32
+func (t *Mat4x4) Invert(m *Mat4x4) {
+	var s = new([6]float32)
 	s[0] = m[0][0]*m[1][1] - m[1][0]*m[0][1]
 	s[1] = m[0][0]*m[1][2] - m[1][0]*m[0][2]
 	s[2] = m[0][0]*m[1][3] - m[1][0]*m[0][3]
@@ -200,7 +200,7 @@ func (t *Mat4x4) Invert(m Mat4x4) {
 	s[4] = m[0][1]*m[1][3] - m[1][1]*m[0][3]
 	s[5] = m[0][2]*m[1][3] - m[1][2]*m[0][3]
 
-	var c [6]float32
+	var c = new([6]float32)
 	c[0] = m[2][0]*m[3][1] - m[3][0]*m[2][1]
 	c[1] = m[2][0]*m[3][2] - m[3][0]*m[2][2]
 	c[2] = m[2][0]*m[3][3] - m[3][0]*m[2][3]
@@ -231,26 +231,26 @@ func (t *Mat4x4) Invert(m Mat4x4) {
 	t[3][3] = (m[2][0]*s[3] - m[2][1]*s[1] + m[2][2]*s[0]) * idet
 }
 
-func (r *Mat4x4) OrthoNormalize(m Mat4x4) {
+func (r *Mat4x4) OrthoNormalize(m *Mat4x4) {
 	r.Dup(m)
 	var s float32
-	var h Vec3
-	r[2].Norm(r[2])
+	var h = new(Vec3)
+	r[2].Norm(&r[2])
 
-	s = Vec4MultInner3(r[1], r[2])
-	h.ScaleVec4(r[2], s)
-	r[1].SubVec3(r[1], h)
-	r[2].Norm(r[2])
+	s = Vec4MultInner3(&r[1], &r[2])
+	h.ScaleVec4(&r[2], s)
+	r[1].SubVec3(&r[1], h)
+	r[2].Norm(&r[2])
 
-	s = Vec4MultInner3(r[1], r[2])
-	h.ScaleVec4(r[2], s)
-	r[1].SubVec3(r[1], h)
-	r[1].Norm(r[1])
+	s = Vec4MultInner3(&r[1], &r[2])
+	h.ScaleVec4(&r[2], s)
+	r[1].SubVec3(&r[1], h)
+	r[1].Norm(&r[1])
 
-	s = Vec4MultInner3(r[0], r[1])
-	h.ScaleVec4(r[1], s)
-	r[0].SubVec3(r[0], h)
-	r[0].Norm(r[0])
+	s = Vec4MultInner3(&r[0], &r[1])
+	h.ScaleVec4(&r[1], s)
+	r[0].SubVec3(&r[0], h)
+	r[0].Norm(&r[0])
 }
 
 func (m *Mat4x4) Frustum(l, r, b, t, n, f float32) {
@@ -323,22 +323,22 @@ func (m *Mat4x4) Perspective(y_fov, aspect, n, f float32) {
 	m[3][3] = 0
 }
 
-func (m *Mat4x4) LookAt(eye, center, up Vec3) {
+func (m *Mat4x4) LookAt(eye, center, up *Vec3) {
 	// Adapted from Android's OpenGL Matrix.java.
 	// See the OpenGL GLUT documentation for gluLookAt for a description
 	// of the algorithm. We implement it in a straightforward way:
 	//
 	// TODO: The negation of of can be spared by swapping the order of
 	//       operands in the following cross products in the right way.
-	var f Vec3
+	var f = new(Vec3)
 	f.Sub(center, eye)
 	f.Norm(f)
 
-	var s Vec3
+	var s = new(Vec3)
 	s.MultCross(f, up)
 	s.Norm(s)
 
-	var t Vec3
+	var t = new(Vec3)
 	t.MultCross(s, f)
 
 	m[0][0] = s[0]
@@ -364,13 +364,13 @@ func (m *Mat4x4) LookAt(eye, center, up Vec3) {
 	m.TranslateInPlace(-eye[0], -eye[1], -eye[2])
 }
 
-func (r Vec3) QuatMultVec3(q Quat, v Vec3) {
+func (r *Vec3) QuatMultVec3(q *Quat, v *Vec3) {
 	// Method by Fabian 'ryg' Giessen (of Farbrausch)
 	//   t = 2 * cross(q.xyz, v)
 	//   v' = v + q.w * t + cross(q.xyz, t)
-	var t Vec3
-	var q_xyz Vec3 = Vec3{q[0], q[1], q[2]}
-	var u Vec3 = Vec3{q[0], q[1], q[2]}
+	var t = new(Vec3)
+	var q_xyz = &Vec3{q[0], q[1], q[2]}
+	var u = &Vec3{q[0], q[1], q[2]}
 
 	t.MultCross(q_xyz, v)
 	t.Scale(t, 2)
@@ -382,13 +382,13 @@ func (r Vec3) QuatMultVec3(q Quat, v Vec3) {
 	r.Add(r, u)
 }
 
-func (r Vec4) QuatMultVec4(q Quat, v Vec4) {
+func (r *Vec4) QuatMultVec4(q *Quat, v *Vec4) {
 	// Method by Fabian 'ryg' Giessen (of Farbrausch)
 	//   t = 2 * cross(q.xyz, v)
 	//   v' = v + q.w * t + cross(q.xyz, t)
-	var t Vec4
-	var q_xyz Vec4 = Vec4{q[0], q[1], q[2]}
-	var u Vec4 = Vec4{q[0], q[1], q[2]}
+	var t = new(Vec4)
+	var q_xyz = &Vec4{q[0], q[1], q[2]}
+	var u = &Vec4{q[0], q[1], q[2]}
 
 	t.MultCross(q_xyz, v)
 	t.Scale(t, 2)
@@ -400,7 +400,7 @@ func (r Vec4) QuatMultVec4(q Quat, v Vec4) {
 	r.Add(r, u)
 }
 
-func (m *Mat4x4) FromQuat(q Quat) {
+func (m *Mat4x4) FromQuat(q *Quat) {
 	var a float32 = q[3]
 	var b float32 = q[0]
 	var c float32 = q[1]
@@ -431,12 +431,12 @@ func (m *Mat4x4) FromQuat(q Quat) {
 	m[3][3] = 1
 }
 
-func (r *Mat4x4) MultQuat(m Mat4x4, q Quat) {
+func (r *Mat4x4) MultQuat(m *Mat4x4, q *Quat) {
 	// XXX: The way this is written only works for othogonal matrices.
 	// TODO: Take care of non-orthogonal case.
-	r[0].QuatMultVec4(q, m[0])
-	r[1].QuatMultVec4(q, m[1])
-	r[2].QuatMultVec4(q, m[2])
+	r[0].QuatMultVec4(q, &m[0])
+	r[1].QuatMultVec4(q, &m[1])
+	r[2].QuatMultVec4(q, &m[2])
 
 	r[3][0] = 0
 	r[3][1] = 0
