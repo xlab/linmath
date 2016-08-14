@@ -34,6 +34,14 @@ func (m *Mat4x4) Slice() []float32 {
 	return *(*[]float32)(unsafe.Pointer(hdr))
 }
 
+func (m *Mat4x4) CopyTo(buf *[4][4]float32) {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			buf[i][j] = m[i][j]
+		}
+	}
+}
+
 func (v *Vec4) Sizeof() int {
 	return 4 * 4 * 4
 }
@@ -44,6 +52,12 @@ func (v *Vec4) Slice() []float32 {
 		Data: uintptr(unsafe.Pointer(v)),
 	}
 	return *(*[]float32)(unsafe.Pointer(hdr))
+}
+
+func (v *Vec4) CopyTo(buf *[4]float32) {
+	for i := 0; i < 4; i++ {
+		buf[i] = v[i]
+	}
 }
 
 type sliceHeader struct {
