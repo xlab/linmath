@@ -2,6 +2,14 @@ package linmath
 
 type Mat4x4 [4]Vec4
 
+func (m *Mat4x4) Fill(d float32) {
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			m[i][j] = d
+		}
+	}
+}
+
 func (m *Mat4x4) Identity() {
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 4; j++ {

@@ -6,6 +6,11 @@ import (
 	"unsafe"
 )
 
+func (m *Mat4x4) Data() []byte {
+	const mm = 0x7fffffff
+	return (*[mm]byte)(unsafe.Pointer(m))[:SizeofMat4x4]
+}
+
 func DumpMatrix(m *Mat4x4, note string) string {
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, "[mat4x4] %s: \n", note)
@@ -22,42 +27,66 @@ func DumpVec4(v *Vec4, note string) string {
 	return buf.String()
 }
 
-func (m *Mat4x4) Sizeof() int {
-	return 4 * 4 * 4
+const (
+	SizeofMat4x4 = 4 * 4 * 4
+	SizeofVec4   = 4 * 4
+	SizeofVec3   = 3 * 4
+	SizeofVec2   = 2 * 4
+)
+
+type ArrayVec4 []Vec4
+
+func (a ArrayVec4) Sizeof() int {
+	return len(a) * SizeofVec4
 }
 
-func (m *Mat4x4) Slice() []float32 {
-	hdr := &sliceHeader{
-		Len: 4 * 4, Cap: 4 * 4,
-		Data: uintptr(unsafe.Pointer(m)),
-	}
-	return *(*[]float32)(unsafe.Pointer(hdr))
+func (a ArrayVec4) Data() []byte {
+	const m = 0x7fffffff
+	return (*[m]byte)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&a)).Data))[:len(a)*SizeofVec4]
 }
 
-func (m *Mat4x4) CopyTo(buf *[4][4]float32) {
-	for i := 0; i < 4; i++ {
-		for j := 0; j < 4; j++ {
-			buf[i][j] = m[i][j]
-		}
-	}
+type ArrayVec3 []Vec3
+
+func (a ArrayVec3) Sizeof() int {
+	return len(a) * SizeofVec3
 }
 
-func (v *Vec4) Sizeof() int {
-	return 4 * 4 * 4
+func (a ArrayVec3) Data() []byte {
+	const m = 0x7fffffff
+	return (*[m]byte)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&a)).Data))[:len(a)*SizeofVec3]
 }
 
-func (v *Vec4) Slice() []float32 {
-	hdr := &sliceHeader{
-		Len: 4, Cap: 4,
-		Data: uintptr(unsafe.Pointer(v)),
-	}
-	return *(*[]float32)(unsafe.Pointer(hdr))
+type ArrayVec2 []Vec2
+
+func (a ArrayVec2) Sizeof() int {
+	return len(a) * SizeofVec2
 }
 
-func (v *Vec4) CopyTo(buf *[4]float32) {
-	for i := 0; i < 4; i++ {
-		buf[i] = v[i]
-	}
+func (a ArrayVec2) Data() []byte {
+	const m = 0x7fffffff
+	return (*[m]byte)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&a)).Data))[:len(a)*SizeofVec2]
+}
+
+type ArrayUint16 []uint16
+
+func (a ArrayUint16) Sizeof() int {
+	return len(a) * 2
+}
+
+func (a ArrayUint16) Data() []byte {
+	const m = 0x7fffffff
+	return (*[m]byte)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&a)).Data))[:len(a)*2]
+}
+
+type ArrayFloat32 []float32
+
+func (a ArrayFloat32) Sizeof() int {
+	return len(a) * 4
+}
+
+func (a ArrayFloat32) Data() []byte {
+	const m = 0x7fffffff
+	return (*[m]byte)(unsafe.Pointer((*sliceHeader)(unsafe.Pointer(&a)).Data))[:len(a)*4]
 }
 
 type sliceHeader struct {
