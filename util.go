@@ -27,11 +27,18 @@ func DumpVec4(v *Vec4, note string) string {
 	return buf.String()
 }
 
+func DumpQuat(q *Quat, note string) string {
+	buf := new(bytes.Buffer)
+	fmt.Fprintf(buf, "[quat] %s: \n", note)
+	fmt.Fprintf(buf, "%.3f, %.3f, %.3f, %.3f\n", q[0], q[1], q[2], q[3])
+	return buf.String()
+}
+
 const (
-	SizeofMat4x4 = 4 * 4 * 4
-	SizeofVec4   = 4 * 4
-	SizeofVec3   = 3 * 4
-	SizeofVec2   = 2 * 4
+	SizeofMat4x4 = int(unsafe.Sizeof(Mat4x4{}))
+	SizeofVec4   = int(unsafe.Sizeof(Vec4{}))
+	SizeofVec3   = int(unsafe.Sizeof(Vec3{}))
+	SizeofVec2   = int(unsafe.Sizeof(Vec2{}))
 )
 
 type ArrayVec4 []Vec4

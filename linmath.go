@@ -452,7 +452,7 @@ func (r *Mat4x4) MultQuat(m *Mat4x4, q *Quat) {
 	r[3][3] = 1
 }
 
-func (q *Quat) FromMat4x4(m Mat4x4) {
+func (q *Quat) FromMat4x4(m *Mat4x4) {
 	var r float32
 	var p = []int{0, 1, 2, 0, 1}
 	var idx int
